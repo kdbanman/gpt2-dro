@@ -1,0 +1,1 @@
+accelerate launch gpt2-openwebtext-dro.py config-0.8.json > log-0.8.txt 2>&1 & disown

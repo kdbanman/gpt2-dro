@@ -1,0 +1,15 @@
+ipywidgets
+jupyterlab
+matplotlib
+
+torch
+torchvision
+torchaudio
+
+datasets
+evaluate
+transformers[sentencepiece]
+accelerate
+
+huggingface_hub
+wandb

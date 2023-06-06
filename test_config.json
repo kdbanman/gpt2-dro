@@ -1,0 +1,16 @@
+{
+    "project_name": "gpt2-dro-test",
+    "model_name": "gpt2-openwebtext-dro-multi-gpu-test",
+    "context_length": 256,
+    "batch_size": 32,
+    "weight_decay": 0.1,
+    "learning_rate": 5e-4,
+    "learning_rate_warmup_steps": 1000,
+    "grad_clip_norm": 1.0,
+    "cvar_alpha": 0.8,
+    "num_train_epochs": 1,
+    "epoch_step_logging_interval": 8,
+    "gradient_accumulation_steps": 8,
+    "gradient_step_eval_interval": 10,
+    "num_eval_batches": 50
+}
