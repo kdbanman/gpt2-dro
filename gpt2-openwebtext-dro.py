@@ -170,6 +170,13 @@ def run_experiment(config_filename):
         for epoch_step, batch in tqdm(
             enumerate(train_dataloader, start=1), total=len(train_dataloader)
         ):
+            # Note: this code was adapted from a tutorial, and does not properly use
+            # Accelerate's gradient accumulation system:
+            #
+            #     https://huggingface.co/docs/accelerate/usage_guides/gradient_accumulation
+            #
+            # A significant speedup is possible if we do that, especially on multinode runs.
+            
             logits = model(batch["input_ids"]).logits
             loss = dro_loss(batch["input_ids"], logits, alpha=config['cvar_alpha'])
             log_payload = {
