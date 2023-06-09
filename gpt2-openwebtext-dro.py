@@ -109,17 +109,27 @@ def evaluate(accelerator, model, eval_dataloader, max_eval_batches=None):
 
 
 def run_experiment(config_filename):
-    hf_hub.login(token=read_key('huggingface.key'), write_permission=True, add_to_git_credential=True)
+    hf_hub.login(token=read_key('huggingface.key'), add_to_git_credential=True)
     wandb.login(key=read_key('wandb.key'))
 
     config = load_config(config_filename)
 
+    # TODO
+    # compute canada is currently hanging here.  I should consider:
+    # - adding an rsync command to move the dataset to SLURM_TMPDIR to the slurm launch script
+    # - parametrizing the dataset location below via a 
+    #     directory + 'tokenized...'
+    #   using a sys.argv, so that $SLURM_TMPDIR can be used as a final argument
+    print('Preparing dataloaders...')
     train_dataloader, eval_dataloader = get_dataloaders('tokenized-openwebtext', config['batch_size'])
 
+    print('Perparing tokenizer...')
     # For now, the dataset is tokenized in advance using context_length, so this value is fixed
     # at tokenization time.  In the future, tokenization should really be streamed.  Then 
     # context_length can be varied.
     tokenizer = AutoTokenizer.from_pretrained("gpt2")
+
+    print('Perparing model...')
     model = GPT2LMHeadModel(AutoConfig.from_pretrained(
         "gpt2",
         vocab_size=len(tokenizer),
@@ -127,8 +137,11 @@ def run_experiment(config_filename):
         bos_token_id=tokenizer.bos_token_id,
         eos_token_id=tokenizer.eos_token_id,
     ))
+
+    print('Preparing optimizer...')
     optimizer = torch.optim.AdamW(get_grouped_params(model, config['weight_decay']), lr=config['learning_rate'])
 
+    print('Preparing accelerator...')
     accelerator = Accelerator(cpu=False, log_with='wandb')
     accelerator.init_trackers(
         project_name=config['project_name'],
@@ -152,6 +165,7 @@ def run_experiment(config_filename):
         num_training_steps=num_training_steps,
     )
 
+    print('Preparing huggingface repo...')
     if accelerator.is_main_process:
         repo_name = hf_hub.get_full_repo_name(config['model_name'])
         try:
@@ -165,6 +179,7 @@ def run_experiment(config_filename):
     gradient_steps_since_eval = 0
     gradient_steps = 0
 
+    print('Beginning training...')
     model.train()
     for epoch in range(1, config['num_train_epochs'] + 1):
         for epoch_step, batch in tqdm(
