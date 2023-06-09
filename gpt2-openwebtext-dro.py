@@ -1,4 +1,4 @@
-import json, sys
+import json, sys, os
 
 import huggingface_hub as hf_hub
 import wandb
@@ -108,7 +108,7 @@ def evaluate(accelerator, model, eval_dataloader, max_eval_batches=None):
     return loss.item(), perplexity.item()
 
 
-def run_experiment(config_filename):
+def run_experiment(config_filename, dataset_path='tokenized-openwebtext'):
     hf_hub.login(token=read_key('huggingface.key'), add_to_git_credential=True)
     wandb.login(key=read_key('wandb.key'))
 
@@ -121,7 +121,7 @@ def run_experiment(config_filename):
     #     directory + 'tokenized...'
     #   using a sys.argv, so that $SLURM_TMPDIR can be used as a final argument
     print('Preparing dataloaders...')
-    train_dataloader, eval_dataloader = get_dataloaders('tokenized-openwebtext', config['batch_size'])
+    train_dataloader, eval_dataloader = get_dataloaders(os.path.join(dataset_path), config['batch_size'])
 
     print('Perparing tokenizer...')
     # For now, the dataset is tokenized in advance using context_length, so this value is fixed
@@ -231,11 +231,13 @@ def run_experiment(config_filename):
 
 
 def main():
-    if len(sys.argv) != 2:
-        print(f'Usage: {sys.argv[0]} <experiment_config.json>')
+    if len(sys.argv) == 2:
+        run_experiment(sys.argv[1])
+    elif len(sys.argv) == 3:
+        run_experiment(sys.argv[1], sys.argv[2])
+    else:
+        print(f'Usage: {sys.argv[0]} <experiment_config.json> [<dataset_path>]')
         quit(1)
-        
-    run_experiment(sys.argv[1])
 
 
 if __name__ == '__main__':
