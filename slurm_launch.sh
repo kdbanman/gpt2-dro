@@ -1,3 +1,11 @@
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --gpus-per-node=v100l:4
+#SBATCH --ntasks-per-node=32
+#SBATCH --exclusive
+#SBATCH --mem=125G
+#SBATCH --time=70:00:00
+#SBATCH --account=def-nidhih
 
 rsync -av tokenized-openwebtext $SLURM_TMPDIR/
 
@@ -10,14 +18,12 @@ pip install -U pip
 pip install --no-index -r requirements.txt
 
 
-# get interactive job on v100 node
-# generate accelerate config
 # run from test config with accelerate launche... (should be in launch script)
 # ensure runs to at least first eval step, huggingface push
 
 # write SGD config : cvar alpha 1.0
 
-accelerate launch gpt2-openwebtext-dro.py config-1.0.json $SLURM_TMPDIR
+accelerate launch gpt2-openwebtext-dro.py config-1.0.json $SLURM_TMPDIR/tokenized-openwebtext
 
 # start run
 # pay attention to tqdm predicted finish time (on karma: 44hrs to complete 66% of an originally 47 hour estimate --> 67 hrs to finish --> multiply original estimate by 1.43)
