@@ -114,13 +114,7 @@ def run_experiment(config_filename, dataset_path='tokenized-openwebtext'):
 
     config = load_config(config_filename)
 
-    # TODO
-    # compute canada is currently hanging here.  I should consider:
-    # - adding an rsync command to move the dataset to SLURM_TMPDIR to the slurm launch script
-    # - parametrizing the dataset location below via a 
-    #     directory + 'tokenized...'
-    #   using a sys.argv, so that $SLURM_TMPDIR can be used as a final argument
-    print('Preparing dataloaders...')
+    print(f'Preparing dataloaders from {dataset_path}...')
     train_dataloader, eval_dataloader = get_dataloaders(os.path.join(dataset_path), config['batch_size'])
 
     print('Perparing tokenizer...')
@@ -231,6 +225,8 @@ def run_experiment(config_filename, dataset_path='tokenized-openwebtext'):
 
 
 def main():
+    print('Attempting to run with arguments:')
+    print(sys.argv)
     if len(sys.argv) == 2:
         run_experiment(sys.argv[1])
     elif len(sys.argv) == 3:
