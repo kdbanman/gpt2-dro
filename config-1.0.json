@@ -1,6 +1,6 @@
 {
     "project_name": "gpt2-dro",
-    "model_name": "gpt2-openwebtext-dro-0.8",
+    "model_name": "gpt2-openwebtext-dro-1.0",
     "context_length": 256,
     "batch_size": 32,
     "weight_decay": 0.1,
